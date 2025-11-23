@@ -1,0 +1,222 @@
+@config "../tailwind.config.js";
+@import "tailwindcss";
+
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-in;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* White Background */
+    --background: 0 0% 100%;
+    --foreground: 262 83% 12%;
+
+    /* White cards with vibrant accents */
+    --card: 0 0% 100%;
+    --card-foreground: 262 83% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 262 83% 12%;
+
+    /* Vibrant Indigo - Primary */
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Vibrant Purple - Secondary */
+    --secondary: 280 100% 70%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted variants using light purple */
+    --muted: 270 60% 90%;
+    --muted-foreground: 262 83% 12%;
+
+    /* Accent using hot pink */
+    --accent: 340 82% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Red for errors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Green for success */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Borders using light purple tones */
+    --border: 270 60% 88%;
+    --input: 270 60% 90%;
+    --ring: 262 83% 58%;
+
+    --radius: 0.5rem;
+
+    /* Sidebar colors - Light Purple Background */
+    --sidebar-background: 270 60% 90%;
+    --sidebar-foreground: 262 83% 12%;
+    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 270 60% 88%;
+    --sidebar-accent-foreground: 262 83% 12%;
+    --sidebar-border: 280 100% 70%;
+    --sidebar-ring: 262 83% 58%;
+
+    /* Custom design tokens - Vibrant purple/pink gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(280 100% 70%));
+    --gradient-subtle: linear-gradient(180deg, hsl(270 60% 90%), hsl(270 60% 88%));
+    --gradient-vibrant: linear-gradient(135deg, hsl(262 83% 58%), hsl(280 100% 70%), hsl(340 82% 52%));
+    --shadow-soft: 0 1px 3px 0 hsl(262 83% 12% / 0.1), 0 1px 2px -1px hsl(262 83% 12% / 0.1);
+    --shadow-md: 0 4px 6px -1px hsl(262 83% 58% / 0.15), 0 2px 4px -2px hsl(262 83% 58% / 0.15);
+    --shadow-lg: 0 10px 15px -3px hsl(262 83% 58% / 0.2), 0 4px 6px -4px hsl(262 83% 58% / 0.2);
+    --shadow-glow: 0 0 20px hsl(280 100% 70% / 0.4);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    /* Dark Purple Background */
+    --background: 262 83% 8%;
+    --foreground: 270 60% 90%;
+
+    /* Darker cards with purple tint */
+    --card: 262 83% 12%;
+    --card-foreground: 270 60% 90%;
+
+    --popover: 262 83% 12%;
+    --popover-foreground: 270 60% 90%;
+
+    /* Bright Indigo for primary in dark mode */
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Bright Purple for secondary */
+    --secondary: 280 100% 70%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 262 83% 20%;
+    --muted-foreground: 270 60% 80%;
+
+    /* Vibrant pink accent */
+    --accent: 340 82% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 262 83% 30%;
+    --input: 262 83% 20%;
+    --ring: 280 100% 70%;
+    
+    --sidebar-background: 262 83% 8%;
+    --sidebar-foreground: 270 60% 90%;
+    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 262 83% 20%;
+    --sidebar-accent-foreground: 270 60% 80%;
+    --sidebar-border: 262 83% 30%;
+    --sidebar-ring: 280 100% 70%;
+
+    --shadow-soft: 0 1px 3px 0 hsl(0 0% 0% / 0.5);
+    --shadow-md: 0 4px 6px -1px hsl(280 100% 70% / 0.3);
+    --shadow-lg: 0 10px 15px -3px hsl(280 100% 70% / 0.4);
+    --shadow-glow: 0 0 30px hsl(280 100% 70% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  input, textarea {
+    @apply transition-all duration-200;
+  }
+
+  /* Toast styling */
+  .toast-success {
+    background: hsl(var(--success)) !important;
+    color: hsl(var(--success-foreground)) !important;
+    border-color: hsl(var(--success)) !important;
+  }
+
+  .toast-error {
+    background: hsl(var(--destructive)) !important;
+    color: hsl(var(--destructive-foreground)) !important;
+    border-color: hsl(var(--destructive)) !important;
+  }
+}
+
+
+@media print {
+  /* Ensure background colors (like gray headers) appear */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide shadows in PDF (they look bad in print) */
+  .shadow-xl, .shadow-lg, .shadow-md {
+    box-shadow: none !important;
+  }
+
+  /* Ensure the resume fits on A4 paper */
+  @page {
+    margin: 0;
+    size: auto;
+  }
+
+  /* Hide the "Download" buttons if they are accidentally inside the ref */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Reset background to white for the print area */
+  body {
+    background-color: white;
+  }
+}
