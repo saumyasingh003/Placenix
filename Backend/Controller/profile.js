@@ -1,5 +1,11 @@
 import Profile from "../Models/profile.js";
 import cloudinary from "../config/Cloudinary.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 //get all profiles
 export const getAllProfiles = async (req, res) => {
@@ -21,13 +27,49 @@ export const getAllProfiles = async (req, res) => {
 
 
 
-/* ✅ Add Profile (with Cloudinary resume upload)  */
+
+/* -------------------------------------------------------------------------- */
+/* ✅ Get Logged-in User's Profile                                            */
+/* -------------------------------------------------------------------------- */
+export const getMyProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const profile = await Profile.findOne({ user: userId });
+
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        message: "No profile found for this user",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: profile,
+    });
+
+  } catch (error) {
+    console.error("❌ Error fetching user profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch user profile",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+/* ✅ Add Profile (with local file storage)  */
 
 export const addProfile = async (req, res) => {
   try {
     const fields = req.body || {};
     const file = req.file || null;
     const user = req.user;
+    console.log(user)
 
     console.log("📦 Received body:", fields); // 👀 Debug: See all fields in console
 
@@ -39,32 +81,42 @@ export const addProfile = async (req, res) => {
       githubLink,
       leetcodeLink,
       contact,
-      backlogs,
+      backlogs, 
     } = fields;
 
     // 🔍 Check if profile already exists for this user
     const existingProfile = await Profile.findOne({ user: user._id });
     if (existingProfile) {
       return res
-        .status(400)
+        .status(400) 
         .json({ success: false, message: "Profile already exists" });
     }
 
-    // ✅ Handle Resume Upload (either file or URL)
+    // ✅ Handle Resume Upload (either file or URL) 
     let resumeUrl = null;
     let resumePublicId = null;
 
     if (file) {
       try {
-        const dataUri = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
-        const result = await cloudinary.uploader.upload(dataUri, {
-          folder: "resumes",
-          resource_type: "auto",
-        });
-        resumeUrl = result.secure_url;
-        resumePublicId = result.public_id;
+        // Create resumes directory if it doesn't exist
+        const resumesDir = path.join(__dirname, "..", "resumes");
+        if (!fs.existsSync(resumesDir)) {
+          fs.mkdirSync(resumesDir, { recursive: true });
+        }
+
+        // Generate unique filename
+        const fileExtension = path.extname(file.originalname) || ".pdf";
+        const uniqueFileName = `${user._id}_${Date.now()}${fileExtension}`;
+        const filePath = path.join(resumesDir, uniqueFileName);
+
+        // Write file to disk
+        fs.writeFileSync(filePath, file.buffer);
+
+        // Store only the path part (e.g., /resumes/filename.pdf)
+        resumeUrl = `/resumes/${uniqueFileName}`;
+        resumePublicId = uniqueFileName; // Store filename for potential deletion later
       } catch (err) {
-        console.error("❌ Cloudinary upload error:", err);
+        console.error("❌ File save error:", err);
         return res
           .status(500)
           .json({ success: false, message: "Resume upload failed" });

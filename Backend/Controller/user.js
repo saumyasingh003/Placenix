@@ -41,14 +41,14 @@ export const registerUser = async (req, res) => {
 //  Login user
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !role) {
       return res.status(400).json({ message: "Please provide email and password" });
     }
 
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, role });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -56,6 +56,7 @@ export const loginUser = async (req, res) => {
     // Match password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
+      console.log("invalid credentials!")
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -71,6 +72,7 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.log("error in login user:", error);
     res.status(500).json({ message: error.message });
   }
 };

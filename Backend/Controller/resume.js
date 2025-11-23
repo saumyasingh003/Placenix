@@ -121,19 +121,52 @@ export const improveWithAI = async (req, res) => {
     for (const item of allItems) {
       if (!item.text || !item.type) continue; // skip invalid ones
 
-      const prompt = `
-You are an expert resume writer. Improve the following ${item.type} description for a ${branch || "technology"} student.
-Make it more impactful, concise, quantifiable, and aligned with industry standards.
+     let prompt = "";
 
-Current content: "${item.text}"
+if (item.type === "achievement" || item.type === "position") {
+  // ---------------- ACHIEVEMENT / POR → ONE BIG SENTENCE ----------------
+  prompt = `
+You are an expert resume writer. Rewrite the following ${item.type} description for a ${branch || "technology"} student.
 
-Guidelines:
-1. Use strong action verbs.
-2. Add measurable results or metrics.
-3. Highlight technical or leadership skills.
-4. Focus on achievements, not tasks.
-5. Return only the improved version (no explanation).
-      `;
+Your output MUST follow these rules:
+- Return ONLY **one single powerful sentence**.
+- Make it high-impact, achievement-centric, and technically strong.
+- Use strong action verbs (Achieved, Delivered, Led, Engineered, Executed, Designed, etc.).
+- Add measurable or quantifiable results wherever possible.
+- Do NOT add bullet points.
+- Do NOT add heading, prefixes, or explanation.
+
+Example style:
+Engineered a high-performance analytics module that boosted reporting efficiency by 45% and improved system reliability across production environments.
+
+Now improve the description below:
+"${item.text}"
+`;
+} else {
+  // ---------------- EXPERIENCE / PROJECTS → 3 BULLETS ----------------
+  prompt = `
+You are an expert resume writer. Rewrite the following ${item.type} description for a ${branch || "technology"} student.
+
+Your output MUST follow these rules:
+- Return ONLY **3 bullet points** (no heading, no title).
+- Each bullet must be short (7–8 words), crisp, and high-impact.
+- Use strong action verbs (Designed, Built, Developed, Optimized, Automated, etc.).
+- Add measurable/quantifiable impact wherever possible.
+- Focus on achievements, not tasks.
+- Make it sound technically strong and industry-ready.
+- Do NOT add more than 3 points.
+
+Example style:
+• Designed scalable backend APIs improving request speed by 40%.
+• Engineered responsive UI system enhancing user workflow efficiency.
+• Automated deployment pipelines reducing manual release time by 60%.
+
+Now improve the description below:
+"${item.text}"
+`;
+}
+
+      
 
       const result = await model.generateContent(prompt);
 

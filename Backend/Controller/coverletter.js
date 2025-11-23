@@ -12,27 +12,66 @@ export const generateCoverLetter = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const prompt = `
-      Write a professional cover letter for a ${jobTitle} position at ${companyName}.
-      
-      About the candidate:
-      - Industry: ${user.industry || "Not specified"}
-      - Years of Experience: ${user.experience || "Not specified"}
-      - Skills: ${user.skills?.join(", ") || "Not specified"}
-      - Professional Background: ${user.bio || "Not provided"}
-      
-      Job Description:
-      ${jobDescription}
-      
-      Requirements:
-      1. Use a professional, enthusiastic tone
-      2. Highlight relevant skills and experience
-      3. Show understanding of the company's needs
-      4. Keep it concise (max 400 words)
-      5. Use proper business letter formatting in markdown
-      6. Include specific examples of achievements
-      7. Relate candidate's background to job requirements
-    `;
+
+    const today = new Date();
+const formattedDate = today.toLocaleDateString("en-US", {
+  day: "numeric",
+  month: "long",
+  year: "numeric"
+});
+
+const prompt = `
+Generate a professional job application email using the following structure and details.
+
+Candidate Information:
+- Name: ${user.name || "Candidate"}
+- Email: ${user.email || "candidate@email.com"}
+- Phone: ${user.contact || "Not provided"}
+- Industry: ${user.industry || "Tech / Data Science / Analytics"}
+- Experience: ${user.experience || "Several years of hands-on experience"}
+- Skills: ${user.skills?.join(", ") || "Python, Java, problem-solving"}
+- Background: ${user.bio || "Hardworking and quick learner"}
+
+Job Details:
+- Role: ${jobTitle}
+- Company: ${companyName}
+- Job Description: ${jobDescription}
+
+Write the email in the following format (maintain exact line breaks):
+
+${user.name}
+${user.email}
+
+${formattedDate}
+
+Hiring Manager, ${companyName}
+
+Dear Sir/Ma’am,
+
+Paragraph 1:
+Write a strong introduction expressing interest in the position, referencing the role and company. Mention the candidate’s background and industry experience. Show confidence, professionalism, and alignment with the company’s goals.
+
+Paragraph 2:
+Explain how the candidate's backend or technical experience is transferable. Mention core skills such as logic building, problem-solving, software design, or teamwork. Highlight adaptability and willingness to learn frontend skills quickly.
+
+Paragraph 3:
+Include one or two general achievements (even if not frontend-related). Express eagerness to contribute to the company, appreciation for their time, and a mention of the attached resume.
+
+End with:
+
+Sincerely,
+${user.name}
+
+Important:
+- DO NOT use markdown, bullets, or asterisks.
+- Use simple text with clean line breaks.
+- The final output must be a polished, human-like email ready to copy and send.
+`;
+
+    
+
+    
+    
 
     const result = await model.generateContent(prompt);
     const content = result.response.text().trim();
@@ -125,6 +164,47 @@ export const deleteCoverLetter = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to delete cover letter",
+      error: error.message,
+    });
+  }
+};
+
+
+
+// ✏️ Manually Update an Existing Cover Letter (NO AI)
+export const manualUpdateCoverLetter = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        message: "Updated content is required",
+      });
+    }
+
+    const updated = await CoverLetter.findOneAndUpdate(
+      { _id: id, user: userId },
+      { content, status: "manually-updated" },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Cover letter not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Cover letter updated successfully",
+      data: updated,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update cover letter",
       error: error.message,
     });
   }

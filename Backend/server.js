@@ -6,10 +6,14 @@ import { errorHandler } from "./Middleware/error.js";
 import dotenv from "dotenv";
 import profileRoutes from "./Routes/profile.js";
 import path from "path";
+import { fileURLToPath } from "url";
 import coverletterRoutes from "./Routes/coverletter.js";
 import resumeRoutes from "./Routes/resume.js";
 import jobFormRoutes from "./Routes/company.js";
 import applicationRoutes from "./Routes/application.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 
@@ -56,17 +60,16 @@ app.use(errorHandler);
 connectDB();
 
 
+// Static file serving (should be before routes to avoid conflicts)
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use("/resumes", express.static(path.join(__dirname, "resumes")));
+
 app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
 app.use("/coverletter", coverletterRoutes);
 app.use("/resume", resumeRoutes);
 app.use("/company", jobFormRoutes);
 app.use("/application", applicationRoutes);
-
-
-
-
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

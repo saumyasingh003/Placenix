@@ -258,3 +258,150 @@ export const getStudentsByStatus = async (req, res) => {
     });
   }
 };
+
+// 🧩 Admin: Get all applicants for a specific company
+export const getApplicantsByCompanyId = async (req, res) => {
+  try {
+    const user = req.user;
+    const { companyId } = req.params;
+
+    // ✅ Only admin can access
+    if (user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Only admin can view this data.",
+      });
+    }
+
+    // ✅ Check if company exists
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company not found.",
+      });
+    }
+
+    // ✅ Find all applications for this company with populated student profile
+    const applications = await Application.find({ company: companyId })
+      .populate({
+        path: "student",
+        select: "name email branch cgpa collegeName contact resume resumePublicId linkedinLink githubLink leetcodeLink backlogs jobPreference",
+      })
+      .sort({ appliedAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: "Applicants fetched successfully",
+      count: applications.length,
+      data: applications,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+export const getEarliestCompanyVisit = async (req, res) => {
+  try {
+    const today = new Date();
+    const studentId = req.user?._id;
+
+    // 1️⃣ Get the earliest upcoming company
+    const earliestCompany = await Company.find({
+      visitDate: { $gte: today },
+    })
+      .sort({ visitDate: 1 })
+      .limit(1);
+
+    if (!earliestCompany || earliestCompany.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No upcoming company visits found.",
+      });
+    }
+
+    const company = earliestCompany[0];
+
+    // 2️⃣ Get student profile
+    const studentProfile = await Profile.findOne({ user: studentId });
+    const studentProfileId = studentProfile?._id || null;
+
+    // 3️⃣ Count total applied students
+    const totalApplied = await Application.countDocuments({
+      company: company._id,
+    });
+
+    // 4️⃣ Get student's application
+    let application = null;
+    if (studentProfileId) {
+      application = await Application.findOne({
+        student: studentProfileId,
+        company: company._id,
+      });
+    }
+
+    const hasApplied = Boolean(application);
+
+    // 5️⃣ Check if registration is closed
+    let isClosed = false;
+    if (company.endRegistrationDate) {
+      const end = new Date(company.endRegistrationDate);
+      end.setHours(23, 59, 59, 999);
+      isClosed = end < new Date();
+    }
+
+    // 6️⃣ Determine studentStatus
+    let studentStatus = "Not Applied";
+
+    if (hasApplied) {
+      studentStatus = "Applied"; // because student applied (from applyForCompany)
+    } else if (!hasApplied && isClosed) {
+      studentStatus = "Closed"; // registration ended but student didn't apply
+    }
+
+    // 7️⃣ applicationStage comes from Application.status (admin updates)
+    const applicationStage = hasApplied ? application.status : null;
+
+    // 8️⃣ Determine jobType (tech / non-tech)
+    let jobType = null;
+    const rawCategory = company.jobCategory || company.type;
+
+    if (rawCategory) {
+      const jc = rawCategory.toLowerCase();
+      if (jc.includes("tech")) jobType = "tech";
+      else if (jc.includes("non")) jobType = "non-tech";
+      else jobType = rawCategory;
+    }
+
+    // 9️⃣ Format visit date
+    const visitDate = new Date(company.visitDate).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
+    // 🔟 Send clean response
+    return res.status(200).json({
+      success: true,
+      data: {
+        companyId: company._id,
+        companyName: company.companyName,
+        visitDate,
+        totalStudentsApplied: totalApplied,
+        jobType,           // tech | non-tech
+        studentStatus,     // Applied | Not Applied | Closed
+        applicationStage,  // Applied | Shortlisted | Interview | Hired | Rejected | null
+      },
+    });
+  } catch (error) {
+    console.error("Error in getEarliestCompanyVisit:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

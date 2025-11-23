@@ -10,7 +10,7 @@ const companySchema = new mongoose.Schema(
     description: {
       type: String,
       required: [true, "Description is required"],
-    },
+    }, 
     startRegistrationDate: {
       type: Date,
       required: [true, "Start registration date is required"],
@@ -27,8 +27,8 @@ const companySchema = new mongoose.Schema(
     },
     visitDate: {
       type: Date,
-      required: [true, "Company visit date is required"],
-    },
+      required: [true, "Company visit date is required"], 
+    }, 
     type: {
       type: String,
       enum: ["job", "internship", "both"],
