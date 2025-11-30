@@ -1,4 +1,3 @@
-// CompanyApplicants.jsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
@@ -10,8 +9,6 @@ import {
   FaCalendar,
   FaBriefcase,
   FaMoneyBillWave,
-  FaSearch,
-  FaDownload,
 } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "sonner";
@@ -28,7 +25,6 @@ const CompanyApplicants = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  // Format date to 1 Nov 2025
   const formatDate = (date) => {
     if (!date) return "Not specified";
     return new Date(date).toLocaleDateString("en-GB", {
@@ -38,7 +34,6 @@ const CompanyApplicants = () => {
     });
   };
 
-  // Fix company status based on dates
   const computeStatus = (endDate) => {
     if (!endDate) return "Closed";
     const today = new Date();
@@ -91,7 +86,6 @@ const CompanyApplicants = () => {
   if (!company)
     return <p className="p-6 text-center text-gray-600">Company not found</p>;
 
-  // Update status UI-colored dropdown
   const updateStatus = async (applicationId, newStatus) => {
     try {
       const currentUser = JSON.parse(localStorage.getItem("currentUser"));
@@ -117,7 +111,6 @@ const CompanyApplicants = () => {
     }
   };
 
-  // Dropdown color classes
   const statusColors = {
     Applied: "bg-blue-100 text-blue-700",
     Shortlisted: "bg-yellow-100 text-yellow-700",
@@ -126,7 +119,6 @@ const CompanyApplicants = () => {
     Rejected: "bg-red-100 text-red-700",
   };
 
-  // CSV download
   const escapeCsv = (v) => {
     if (!v) return "";
     const s = String(v);
@@ -160,7 +152,6 @@ const CompanyApplicants = () => {
     a.click();
   };
 
-  // Excel download
   const downloadExcel = () => {
     const data = applicants.map((a) => ({
       Name: a.student?.name,
@@ -179,7 +170,6 @@ const CompanyApplicants = () => {
     XLSX.writeFile(wb, "applicants.xlsx");
   };
 
-  // Filtering + searching
   const filteredApplicants = applicants.filter((a) => {
     const s = a.student || {};
     const q = searchQuery.toLowerCase();
@@ -207,7 +197,7 @@ const CompanyApplicants = () => {
         <FaArrowLeft /> Back
       </button>
 
-      {/* ---------------- COMPANY CARD ---------------- */}
+      {/* COMPANY CARD */}
       <div className="bg-white border rounded-xl shadow p-6 space-y-6">
 
         <div className="flex items-center gap-4">
@@ -221,14 +211,11 @@ const CompanyApplicants = () => {
           </div>
         </div>
 
-        {/* Company details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-5 rounded-xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-5 rounded-xl">
           <Detail label="Job Category" value={company.jobCategory} icon={<FaBriefcase />} />
           <Detail label="Type" value={company.type} icon={<FaBriefcase />} />
-
           <Detail label="Package (LPA)" value={company.packageOffered || "N/A"} icon={<FaMoneyBillWave />} />
           <Detail label="Internship Stipend" value={company.internshipStipend || "N/A"} icon={<FaMoneyBillWave />} />
-
           <Detail label="Registration Start" value={formatDate(company.startRegistrationDate)} icon={<FaCalendar />} />
           <Detail label="Registration End" value={formatDate(company.endRegistrationDate)} icon={<FaCalendar />} />
           <Detail label="Visit Date" value={formatDate(company.visitDate)} icon={<FaCalendar />} />
@@ -247,24 +234,28 @@ const CompanyApplicants = () => {
             {company.hiringProcess?.coding && <li>Coding Round</li>}
             {company.hiringProcess?.groupDiscussion && <li>Group Discussion</li>}
             {company.hiringProcess?.personalInterview && <li>Personal Interview</li>}
-            {!Object.values(company.hiringProcess || {}).some(Boolean) && <p className="text-gray-500">Not specified</p>}
+            {!Object.values(company.hiringProcess || {}).some(Boolean) && (
+              <p className="text-gray-500">Not specified</p>
+            )}
           </ul>
         </Section>
       </div>
 
-      {/* ---------------- APPLICANTS TABLE ---------------- */}
+      {/* APPLICANTS TABLE / MOBILE CARDS */}
       <div className="bg-white border rounded-xl shadow overflow-hidden">
 
+        {/* Search + Filters */}
         <div className="p-6 border-b flex flex-col md:flex-row gap-4 justify-between">
+
           <input
             type="text"
             placeholder="Search by name, email, branch..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-4 py-2 w-full md:w-1/2 border rounded-lg"
+            className="px-4 py-2 w-full border rounded-lg"
           />
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -278,89 +269,138 @@ const CompanyApplicants = () => {
               <option value="Rejected">Rejected</option>
             </select>
 
-            <button onClick={downloadCSV} className="px-2 py-2 bg-blue-600 text-white rounded-lg">
-              Download CSV
+            <button onClick={downloadCSV} className="px-3 py-2 bg-blue-600 text-white rounded-lg">
+              CSV
             </button>
 
-            <button onClick={downloadExcel} className="px-2 py-2 bg-green-600 text-white rounded-lg">
-              Download  Excel
+            <button onClick={downloadExcel} className="px-3 py-2 bg-green-600 text-white rounded-lg">
+              Excel
             </button>
           </div>
         </div>
 
         {filteredApplicants.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px]">
-              <thead>
-                <tr>
-                  <Th>Name</Th>
-                  <Th>Email</Th>
-                  <Th>Phone</Th>
-                  <Th>CGPA</Th>
-                  <Th>Branch</Th>
-                  <Th>Resume</Th>
-                  <Th>Status</Th>
-                  <Th>Applied Date</Th>
-                </tr>
-              </thead>
+          <>
+            {/* DESKTOP TABLE */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[900px]">
+                <thead>
+                  <tr>
+                    <Th>Name</Th>
+                    <Th>Email</Th>
+                    <Th>Phone</Th>
+                    <Th>CGPA</Th>
+                    <Th>Branch</Th>
+                    <Th>Resume</Th>
+                    <Th>Status</Th>
+                    <Th>Applied</Th>
+                  </tr>
+                </thead>
 
-              <tbody className="divide-y">
-                {filteredApplicants.map((a) => {
-                  const s = a.student || {};
+                <tbody className="divide-y">
+                  {filteredApplicants.map((a) => {
+                    const s = a.student || {};
+                    return (
+                      <tr key={a._id} className="hover:bg-gray-50">
 
-                  return (
-                    <tr key={a._id} className="hover:bg-gray-50">
+                        <Td>{s.name || "N/A"}</Td>
 
-                      <Td>{s.name || "N/A"}</Td>
+                        <Td>
+                          <div className="flex items-center gap-2">
+                            <FaEnvelope className="w-3 h-3" /> {s.email}
+                          </div>
+                        </Td>
 
-                      <Td>
-                        <div className="flex items-center gap-2">
-                          <FaEnvelope className="w-3 h-3" /> {s.email}
-                        </div>
-                      </Td>
+                        <Td>
+                          <div className="flex items-center gap-2">
+                            <FaPhone className="w-3 h-3" /> {s.contact}
+                          </div>
+                        </Td>
 
-                      <Td>
-                        <div className="flex items-center gap-2">
-                          <FaPhone className="w-3 h-3" /> {s.contact}
-                        </div>
-                      </Td>
+                        <Td>{s.cgpa}</Td>
+                        <Td>{s.branch}</Td>
 
-                      <Td>{s.cgpa}</Td>
-                      <Td>{s.branch}</Td>
+                        <Td>
+                          {s.resume ? (
+                            <a href={s.resume} target="_blank" className="underline text-blue-600">
+                              View
+                            </a>
+                          ) : (
+                            "N/A"
+                          )}
+                        </Td>
 
-                      <Td>
+                        <Td>
+                          <select
+                            value={a.status}
+                            onChange={(e) => updateStatus(a._id, e.target.value)}
+                            className={`px-2 py-1 rounded-lg text-sm font-medium cursor-pointer ${statusColors[a.status]}`}
+                          >
+                            <option value="Applied">Applied</option>
+                            <option value="Shortlisted">Shortlisted</option>
+                            <option value="Interview">Interview</option>
+                            <option value="Hired">Hired</option>
+                            <option value="Rejected">Rejected</option>
+                          </select>
+                        </Td>
+
+                        <Td>{formatDate(a.appliedAt)}</Td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* MOBILE CARDS */}
+            <div className="md:hidden p-4 space-y-4">
+              {filteredApplicants.map((a) => {
+                const s = a.student || {};
+                return (
+                  <div key={a._id} className="border rounded-xl p-4 bg-gray-50 shadow-sm space-y-3">
+
+                    <h2 className="text-lg font-semibold">{s.name}</h2>
+
+                    <p className="text-sm text-gray-700 flex gap-2">
+                      <FaEnvelope /> {s.email}
+                    </p>
+
+                    <p className="text-sm text-gray-700 flex gap-2">
+                      <FaPhone /> {s.contact}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2 pt-2">
+                      <p className="text-sm"><b>CGPA:</b> {s.cgpa}</p>
+                      <p className="text-sm"><b>Branch:</b> {s.branch}</p>
+
+                      <p className="text-sm col-span-2">
+                        <b>Resume: </b>
                         {s.resume ? (
-                          <a href={s.resume} target="_blank" className="underline text-blue-600">
-                            View
-                          </a>
-                        ) : (
-                          "N/A"
-                        )}
-                      </Td>
+                          <a href={s.resume} target="_blank" className="text-blue-600 underline">View</a>
+                        ) : "N/A"}
+                      </p>
 
-                      <Td>
-                        {/* ONLY Dropdown (Colored Based on Value) */}
-                        <select
-                          value={a.status}
-                          onChange={(e) => updateStatus(a._id, e.target.value)}
-                          className={`px-2 py-1 rounded-lg text-sm font-medium cursor-pointer ${statusColors[a.status]}`}
-                        >
-                          <option className="bg-white text-black" value="Applied">Applied</option>
-                          <option className="bg-white text-black" value="Shortlisted">Shortlisted</option>
-                          <option className="bg-white text-black" value="Interview">Interview</option>
-                          <option className="bg-white text-black" value="Hired">Hired</option>
-                          <option className="bg-white text-black" value="Rejected">Rejected</option>
-                        </select>
-                      </Td>
+                      <p className="text-sm col-span-2">
+                        <b>Applied:</b> {formatDate(a.appliedAt)}
+                      </p>
+                    </div>
 
-                      <Td>{formatDate(a.appliedAt)}</Td>
-
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                    <select
+                      value={a.status}
+                      onChange={(e) => updateStatus(a._id, e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg text-sm font-medium ${statusColors[a.status]}`}
+                    >
+                      <option value="Applied">Applied</option>
+                      <option value="Shortlisted">Shortlisted</option>
+                      <option value="Interview">Interview</option>
+                      <option value="Hired">Hired</option>
+                      <option value="Rejected">Rejected</option>
+                    </select>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         ) : (
           <div className="p-10 text-center text-gray-500">No applications found</div>
         )}

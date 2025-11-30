@@ -17,7 +17,9 @@ const Navbar = () => {
   useEffect(() => {
     const loadNotifications = () => {
       const companies = JSON.parse(localStorage.getItem("companies") || "[]");
-      const viewedNotifications = JSON.parse(localStorage.getItem("viewedNotifications") || "[]");
+      const viewedNotifications = JSON.parse(
+        localStorage.getItem("viewedNotifications") || "[]"
+      );
 
       const notifs = companies.map((company, index) => ({
         id: `company-${index}`,
@@ -30,7 +32,7 @@ const Navbar = () => {
 
       const today = new Date();
       const deadlineNotifs = companies
-        .filter(company => {
+        .filter((company) => {
           const end = new Date(company.endRegistrationDate);
           const daysLeft = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
           return daysLeft <= 3 && daysLeft >= 0;
@@ -49,7 +51,7 @@ const Navbar = () => {
       );
 
       setNotifications(all);
-      setUnreadCount(all.filter(n => !n.isRead).length);
+      setUnreadCount(all.filter((n) => !n.isRead).length);
     };
 
     loadNotifications();
@@ -77,53 +79,62 @@ const Navbar = () => {
       localStorage.setItem("viewedNotifications", JSON.stringify(viewed));
     }
 
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
     );
 
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    setUnreadCount((prev) => Math.max(0, prev - 1));
   };
 
   const markAllAsRead = () => {
-    const allIds = notifications.map(n => n.id);
+    const allIds = notifications.map((n) => n.id);
     localStorage.setItem("viewedNotifications", JSON.stringify(allIds));
 
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     setUnreadCount(0);
   };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
+      <div className="flex h-16 items-center justify-between px-3 sm:px-6">
 
-        {/* LOGO + TITLE */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#FA003F] flex items-center justify-center shadow">
-            <FaGraduationCap className="w-5 h-5 text-white" />
+        {/* LEFT SECTION - LOGO */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-[120px]">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#FA003F] flex items-center justify-center shadow">
+            <FaGraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
-          <h1 className="text-xl font-semibold text-[#FA003F]">PlaceNix</h1>
+          <h1 className="text-lg sm:text-xl font-semibold text-[#FA003F]">
+            PlaceNix
+          </h1>
         </div>
 
-        {/* CENTER TEXT */}
-        <div className="flex-1 flex justify-center">
-          <p className="text-lg italic  text-gray-600">
-            Hello, {" "}
-            <span className="font-medium text-gray-900">
+        {/* CENTER GREETING */}
+        <div className="flex-1 hidden sm:flex justify-center">
+          <p className="text-base lg:text-lg italic text-gray-600 truncate max-w-xs">
+            Hello,{" "}
+            <span className="font-medium text-gray-900 truncate">
               {currentUser.name || "Student"}
             </span>
           </p>
         </div>
 
-        {/* RIGHT SIDE ICONS */}
-        <div className="flex items-center gap-4">
+        {/* ON SMALL SCREENS (MOBILE) */}
+        <div className="sm:hidden">
+          <p className="text-sm italic text-gray-600 truncate max-w-[100px]">
+            Hi, <span className="font-medium">{currentUser.name || "Student"}</span>
+          </p>
+        </div>
+
+        {/* RIGHT SECTION */}
+        <div className="flex items-center gap-3 sm:gap-4">
 
           {/* 🔔 NOTIFICATION BUTTON */}
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative h-10 w-10 rounded-lg border bg-white hover:bg-gray-50 shadow flex items-center justify-center"
+              className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-lg border bg-white hover:bg-gray-50 shadow flex items-center justify-center"
             >
-              <FaBell className="w-5 h-5 text-gray-700" />
+              <FaBell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#FA003F] text-white text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center">
                   {unreadCount}
@@ -131,7 +142,7 @@ const Navbar = () => {
               )}
             </button>
 
-            {/* NOTIFICATION DROPDOWN */}
+            {/* DROPDOWN */}
             {showNotifications && (
               <>
                 <div
@@ -139,9 +150,12 @@ const Navbar = () => {
                   onClick={() => setShowNotifications(false)}
                 />
 
-                <div className="absolute right-0 mt-3 w-80 bg-white border rounded-xl shadow-lg z-50 max-h-[500px] overflow-hidden flex flex-col">
+                <div className="absolute right-0 mt-3 w-72 sm:w-80 bg-white border rounded-xl shadow-lg z-50 max-h-[450px] sm:max-h-[500px] overflow-hidden flex flex-col">
                   <div className="flex items-center justify-between p-4 border-b">
-                    <h3 className="font-semibold text-lg">Notifications</h3>
+                    <h3 className="font-semibold text-base sm:text-lg">
+                      Notifications
+                    </h3>
+
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllAsRead}
@@ -181,13 +195,21 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* 🚪 SIGN OUT */}
+          {/* 🚪 SIGN OUT BUTTON */}
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-2 h-10 px-4 rounded-lg border shadow-sm hover:bg-gray-50 transition font-semibold text-[#FA003F] border-[#FA003F]"
+            className="hidden sm:flex items-center gap-2 h-10 px-4 rounded-lg border shadow-sm hover:bg-gray-50 transition font-semibold text-[#FA003F] border-[#FA003F]"
           >
             <FaSignOutAlt className="w-4 h-4" />
-            <span className="hidden sm:inline">Sign Out</span>
+            <span>Sign Out</span>
+          </button>
+
+          {/* MOBILE SIGNOUT ICON ONLY */}
+          <button
+            onClick={handleSignOut}
+            className="sm:hidden h-9 w-9 flex items-center justify-center rounded-lg border border-[#FA003F] text-[#FA003F] shadow-sm hover:bg-gray-50"
+          >
+            <FaSignOutAlt className="w-4 h-4" />
           </button>
 
         </div>

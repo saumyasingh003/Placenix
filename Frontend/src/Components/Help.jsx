@@ -45,52 +45,45 @@ const Help = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 p-4">
+    <div className="max-w-5xl mx-auto space-y-10 p-4 md:p-6">
 
       {/* HEADER */}
       <div>
-        <h1 className="text-4xl font-bold text-[#00916E]">Help & Support</h1>
-        <p className="text-gray-600 mt-1">We're here to assist you anytime.</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-[#00916E]">
+          Help & Support
+        </h1>
+        <p className="text-gray-600 mt-1 text-sm md:text-base">
+          We're here to assist you anytime.
+        </p>
       </div>
 
       {/* CONTACT CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
 
         {/* EMAIL */}
-        <div
-          className="rounded-xl p-6 text-center shadow-lg border hover:shadow-2xl transition-all"
-          style={{ backgroundColor: "#EE6123" }}
-        >
-          <div className="w-14 h-14 bg-white/25 rounded-full flex items-center justify-center mx-auto mb-3">
-            <FaEnvelope className="text-white text-2xl" />
-          </div>
-          <h3 className="text-xl font-semibold text-white">Email Us</h3>
-          <p className="text-white/90 mt-1">placement@amity.edu</p>
-        </div>
+        <InfoCard
+          bg="#EE6123"
+          icon={<FaEnvelope className="text-white text-2xl" />}
+          title="Email Us"
+          text="placement@amity.edu"
+        />
 
         {/* PHONE */}
-        <div
-          className="rounded-xl p-6 text-center shadow-lg border hover:shadow-2xl transition-all"
-          style={{ backgroundColor: "#FFCF00" }}
-        >
-          <div className="w-14 h-14 bg-black/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <FaPhone className="text-black text-2xl" />
-          </div>
-          <h3 className="text-xl font-semibold text-black">Call Us</h3>
-          <p className="text-black/80 mt-1">+91 120 4392000</p>
-        </div>
+        <InfoCard
+          bg="#FFCF00"
+          icon={<FaPhone className="text-black text-2xl" />}
+          title="Call Us"
+          text="+91 120 4392000"
+          darkText
+        />
 
         {/* OFFICE HOURS */}
-        <div
-          className="rounded-xl p-6 text-center shadow-lg border hover:shadow-2xl transition-all"
-          style={{ backgroundColor: "#FA003F" }}
-        >
-          <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <FaQuestionCircle className="text-white text-2xl" />
-          </div>
-          <h3 className="text-xl font-semibold text-white">Office Hours</h3>
-          <p className="text-white/90 mt-1">Mon–Fri: 9 AM – 5 PM</p>
-        </div>
+        <InfoCard
+          bg="#FA003F"
+          icon={<FaQuestionCircle className="text-white text-2xl" />}
+          title="Office Hours"
+          text="Mon–Fri: 9 AM – 5 PM"
+        />
 
       </div>
 
@@ -101,46 +94,37 @@ const Help = () => {
           Send us a Message
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* NAME */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">Your Name *</label>
-              <input
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full mt-1 rounded-md border px-3 py-2 focus:ring-2 focus:ring-[#00916E]"
-              />
-            </div>
+            <Field
+              label="Your Name *"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
 
             {/* EMAIL */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">Your Email *</label>
-              <input
-                type="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full mt-1 rounded-md border px-3 py-2 focus:ring-2 focus:ring-[#00916E]"
-              />
-            </div>
+            <Field
+              label="Your Email *"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           {/* SUBJECT */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Subject *</label>
-            <input
-              name="subject"
-              required
-              value={formData.subject}
-              onChange={handleChange}
-              className="w-full mt-1 rounded-md border px-3 py-2 focus:ring-2 focus:ring-[#00916E]"
-            />
-          </div>
+          <Field
+            label="Subject *"
+            name="subject"
+            value={formData.subject}
+            onChange={handleChange}
+            required
+          />
 
           {/* MESSAGE */}
           <div>
@@ -151,7 +135,8 @@ const Help = () => {
               required
               value={formData.message}
               onChange={handleChange}
-              className="w-full mt-1 rounded-md border px-3 py-2 focus:ring-2 focus:ring-[#00916E]"
+              className="w-full mt-1 rounded-md border px-3 py-2 focus:ring-2 
+              focus:ring-[#00916E] outline-none transition bg-gray-50"
             />
           </div>
 
@@ -159,7 +144,8 @@ const Help = () => {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="flex items-center gap-2 bg-[#00916E] hover:bg-[#007b5d] text-white px-6 py-2 rounded-lg shadow-md transition-all"
+              className="flex items-center gap-2 bg-[#00916E] hover:bg-[#007b5d] 
+              text-white px-6 py-2 rounded-lg shadow-md transition font-medium"
             >
               <FaPaperPlane /> Submit Query
             </button>
@@ -169,12 +155,11 @@ const Help = () => {
 
       {/* FAQ SECTION */}
       <div className="bg-white border rounded-xl shadow p-6">
-
         <h2 className="text-2xl font-semibold text-[#00916E] mb-4">
           Frequently Asked Questions
         </h2>
 
-        <div className="space-y-5">
+        <div className="space-y-6">
 
           <FAQItem
             q="How do I register for a placement drive?"
@@ -197,7 +182,39 @@ const Help = () => {
   );
 };
 
-/* FAQ ITEM COMPONENT */
+/* INFO CARD COMPONENT */
+const InfoCard = ({ bg, icon, title, text, darkText }) => (
+  <div
+    className="rounded-xl p-6 text-center shadow-md hover:shadow-lg transition-all duration-300"
+    style={{ backgroundColor: bg }}
+  >
+    <div className="w-14 h-14 bg-white/25 rounded-full flex items-center justify-center mx-auto mb-3">
+      {icon}
+    </div>
+    <h3 className={`text-xl font-semibold ${darkText ? "text-black" : "text-white"}`}>
+      {title}
+    </h3>
+    <p
+      className={`mt-1 ${darkText ? "text-black/80" : "text-white/90"} break-words`}
+    >
+      {text}
+    </p>
+  </div>
+);
+
+/* REUSABLE FIELD COMPONENT */
+const Field = ({ label, ...props }) => (
+  <div>
+    <label className="text-sm font-medium text-gray-700">{label}</label>
+    <input
+      {...props}
+      className="w-full mt-1 rounded-md border px-3 py-2 focus:ring-2 
+      focus:ring-[#00916E] outline-none transition bg-gray-50"
+    />
+  </div>
+);
+
+/* FAQ ITEM */
 const FAQItem = ({ q, a }) => (
   <div className="border-l-4 pl-4" style={{ borderColor: "#FFCF00" }}>
     <h3 className="font-semibold text-[#00916E]">{q}</h3>

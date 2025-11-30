@@ -6,8 +6,16 @@ const CoverLetterForm = ({ formData, onChange, onSubmit, isLoading }) => {
     <div className="col-span-2 w-full">
       <form
         onSubmit={onSubmit}
-        className="w-full space-y-6 bg-white p-6 rounded-lg border shadow-sm"
+        className="w-full space-y-6 bg-white p-5 md:p-6 rounded-lg border shadow-sm"
       >
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-2">
+          <FaFileAlt className="text-gray-700 text-xl" />
+          <h2 className="text-lg md:text-xl font-semibold">
+            Generate a Cover Letter
+          </h2>
+        </div>
+
         {/* Company Name */}
         <div>
           <label className="block text-sm font-medium mb-2">
@@ -19,7 +27,7 @@ const CoverLetterForm = ({ formData, onChange, onSubmit, isLoading }) => {
             value={formData.companyName || ""}
             onChange={onChange}
             placeholder="Enter the company name"
-            className="w-full px-3 py-2 border rounded-md bg-background"
+            className="w-full px-3 py-2 border rounded-md bg-gray-50 focus:ring-2 focus:ring-black/40 outline-none transition"
             disabled={isLoading}
             required
           />
@@ -36,7 +44,7 @@ const CoverLetterForm = ({ formData, onChange, onSubmit, isLoading }) => {
             value={formData.jobTitle || ""}
             onChange={onChange}
             placeholder="Enter the job title you're applying for"
-            className="w-full px-3 py-2 border rounded-md bg-background"
+            className="w-full px-3 py-2 border rounded-md bg-gray-50 focus:ring-2 focus:ring-black/40 outline-none transition"
             disabled={isLoading}
             required
           />
@@ -53,7 +61,7 @@ const CoverLetterForm = ({ formData, onChange, onSubmit, isLoading }) => {
             onChange={onChange}
             rows="7"
             placeholder="Paste the job description here"
-            className="w-full px-3 py-2 border rounded-md bg-background"
+            className="w-full px-3 py-2 border rounded-md bg-gray-50 focus:ring-2 focus:ring-black/40 outline-none transition resize-none"
             disabled={isLoading}
             required
           />
@@ -63,7 +71,9 @@ const CoverLetterForm = ({ formData, onChange, onSubmit, isLoading }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full px-4 py-3 bg-black text-white rounded-md hover:bg-gray-900 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-3 bg-black text-white rounded-md 
+                     hover:bg-gray-900 transition-all text-base font-medium 
+                     disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "Generating..." : "Generate Cover Letter"}
         </button>
@@ -73,11 +83,3 @@ const CoverLetterForm = ({ formData, onChange, onSubmit, isLoading }) => {
 };
 
 export default CoverLetterForm;
-
-
-
-
-
-
-
-

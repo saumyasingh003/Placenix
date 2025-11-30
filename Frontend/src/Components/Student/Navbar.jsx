@@ -11,16 +11,18 @@ const Navbar = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // NOTIFICATION LOADER
+  // LOAD NOTIFICATIONS
   useEffect(() => {
     const loadNotifications = () => {
       const companies = JSON.parse(localStorage.getItem("companies") || "[]");
-      const viewedNotifications = JSON.parse(localStorage.getItem("viewedNotifications") || "[]");
+      const viewedNotifications = JSON.parse(
+        localStorage.getItem("viewedNotifications") || "[]"
+      );
 
       const notifs = companies.map((company, index) => ({
         id: `company-${index}`,
         title: `New Placement Drive: ${company.companyName}`,
-        message: `${company.companyName} is hiring! Application deadline: ${company.endRegistrationDate}`,
+        message: `${company.companyName} is hiring! Deadline: ${company.endRegistrationDate}`,
         date: company.startRegistrationDate,
         type: "placement",
         isRead: viewedNotifications.includes(`company-${index}`)
@@ -28,7 +30,7 @@ const Navbar = () => {
 
       const today = new Date();
       const deadlineNotifs = companies
-        .filter(company => {
+        .filter((company) => {
           const endDate = new Date(company.endRegistrationDate);
           const daysUntilDeadline = Math.ceil(
             (endDate - today) / (1000 * 60 * 60 * 24)
@@ -49,7 +51,7 @@ const Navbar = () => {
       );
 
       setNotifications(all);
-      setUnreadCount(all.filter(n => !n.isRead).length);
+      setUnreadCount(all.filter((n) => !n.isRead).length);
     };
 
     loadNotifications();
@@ -57,7 +59,7 @@ const Navbar = () => {
     return () => clearInterval(itv);
   }, []);
 
-  // LOGOUT
+  // SIGN OUT
   const handleSignOut = () => {
     localStorage.removeItem("currentUser");
     toast.success("Signed out successfully");
@@ -72,48 +74,42 @@ const Navbar = () => {
       viewed.push(id);
       localStorage.setItem("viewedNotifications", JSON.stringify(viewed));
 
-      setNotifications(prev =>
-        prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
 
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     }
   };
 
   // MARK ALL
   const markAllAsRead = () => {
-    const allIds = notifications.map(n => n.id);
+    const allIds = notifications.map((n) => n.id);
     localStorage.setItem("viewedNotifications", JSON.stringify(allIds));
 
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     setUnreadCount(0);
   };
 
   return (
     <header
-      className="sticky top-0 z-50 w-full border-b shadow-md"
-      style={{
-        backgroundColor: "#FFFFFF", // <<< WHITE BACKGROUND
-      }}
+      className="sticky top-0 z-50 w-full border-b shadow-md bg-white"
     >
-      <div className="flex h-20 items-center justify-between px-4 md:px-6">
+      <div className="flex h-20 items-center justify-between px-4 sm:px-6">
 
-        {/* LOGO + NAME */}
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-white rounded-xl shadow flex items-center justify-center">
+        {/* LEFT - LOGO */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-xl shadow flex items-center justify-center">
             <FaGraduationCap className="w-6 h-6 text-[#FA003F]" />
           </div>
-          <h1
-            className="text-2xl font-bold tracking-wide"
-            style={{ color: "#FA003F" }}
-          >
+          <h1 className="text-xl sm:text-2xl font-bold" style={{ color: "#FA003F" }}>
             PlaceNix
           </h1>
         </div>
 
-        {/* GREETING */}
-        <div className="flex-1 flex justify-center">
-          <p className="text-lg italic  text-gray-600">
+        {/* CENTER - GREETING */}
+        <div className="hidden sm:flex flex-1 justify-center">
+          <p className="text-lg italic text-gray-600">
             Hello,{" "}
             <span className="font-semibold text-gray-800">
               {currentUser.name || "Student"}
@@ -121,31 +117,35 @@ const Navbar = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* RIGHT SECTION (NOTIFY + LOGOUT) */}
+        <div className="flex items-center gap-2 sm:gap-4">
 
-          {/* NOTIFICATIONS */}
+          {/* NOTIFICATION BUTTON */}
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative h-11 w-11 flex items-center justify-center rounded-lg hover:bg-gray-50 transition border shadow-sm"
+              className="relative h-10 w-10 sm:h-11 sm:w-11 flex items-center justify-center rounded-lg hover:bg-gray-100 transition border shadow-sm"
             >
               <FaBell className="w-5 h-5 text-gray-700" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-white text-xs font-bold">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-red-600 text-white text-xs font-bold">
                   {unreadCount}
                 </span>
               )}
             </button>
 
-            {/* DROPDOWN */}
+            {/* NOTIFICATION DROPDOWN */}
             {showNotifications && (
               <>
                 <div
                   className="fixed inset-0 z-40"
                   onClick={() => setShowNotifications(false)}
                 />
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border rounded-xl shadow-xl z-50 max-h-[500px] overflow-hidden flex flex-col">
-                  <div className="flex items-center justify-between p-4 border-b">
+
+                <div className="absolute right-0 mt-2 w-72 sm:w-96 bg-white border rounded-xl shadow-xl z-50 max-h-[450px] sm:max-h-[500px] overflow-hidden flex flex-col">
+
+                  {/* HEADER */}
+                  <div className="flex items-center justify-between p-3 sm:p-4 border-b">
                     <h3 className="font-semibold text-lg">Notifications</h3>
                     {unreadCount > 0 && (
                       <button
@@ -157,19 +157,20 @@ const Navbar = () => {
                     )}
                   </div>
 
+                  {/* CONTENT */}
                   <div className="overflow-y-auto flex-1">
                     {notifications.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500">
-                        <FaBell className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <div className="p-6 sm:p-8 text-center text-gray-500">
+                        <FaBell className="w-10 h-10 mx-auto mb-3 opacity-50" />
                         <p>No notifications yet</p>
                       </div>
                     ) : (
                       <div className="divide-y">
-                        {notifications.map(n => (
+                        {notifications.map((n) => (
                           <div
                             key={n.id}
                             onClick={() => markAsRead(n.id)}
-                            className={`p-4 cursor-pointer transition hover:bg-gray-100 ${
+                            className={`p-3 sm:p-4 cursor-pointer transition hover:bg-gray-100 ${
                               !n.isRead ? "bg-[#FFF1EE]" : "bg-white"
                             }`}
                           >
@@ -186,14 +187,23 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* SIGN OUT BUTTON */}
+          {/* SIGN OUT */}
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-2 h-11 px-4 rounded-lg border shadow-sm hover:bg-gray-50 transition font-semibold"
+            className="hidden xs:flex items-center gap-2 h-10 sm:h-11 px-3 sm:px-4 rounded-lg border shadow-sm hover:bg-gray-100 transition font-semibold"
             style={{ color: "#FA003F", borderColor: "#FA003F" }}
           >
             <FaSignOutAlt className="w-4 h-4" />
             <span className="hidden sm:inline">Sign Out</span>
+          </button>
+
+          {/* MOBILE SIGNOUT ICON */}
+          <button
+            onClick={handleSignOut}
+            className="xs:hidden h-10 w-10 flex items-center justify-center rounded-lg border shadow-sm hover:bg-gray-100"
+            style={{ color: "#FA003F", borderColor: "#FA003F" }}
+          >
+            <FaSignOutAlt className="w-4 h-4" />
           </button>
         </div>
       </div>

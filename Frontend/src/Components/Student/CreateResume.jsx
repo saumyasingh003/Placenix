@@ -3,7 +3,6 @@ import axios from "axios";
 import {
   FaEnvelope,
   FaGithub,
-  
   FaLinkedin,
   FaMagic,
   FaPhoneAlt,
@@ -13,9 +12,6 @@ import {
 import DatePicker from "react-datepicker";
 import { toast } from "sonner";
 import "react-datepicker/dist/react-datepicker.css";
-
-// PDF packages
-// Remove: import html2canvas from "html2canvas";
 import { useReactToPrint } from "react-to-print";
 
 /* -------------------------------------------------------------------------- */
@@ -58,14 +54,16 @@ const CreateResume = () => {
       { title: "", organization: "", duration: "", description: "" },
     ],
   });
+
   const handlePrint = useReactToPrint({
-    contentRef: resumeRef, // This links the printer to your component
-    documentTitle: `${formData.firstName}_Resume`,
+    contentRef: resumeRef,
+    documentTitle: `${formData.firstName || "My"}_Resume`,
     onBeforeGetContent: async () => {
       await handleSaveResume(); // Save to DB before printing
     },
     onAfterPrint: () => toast.success("Resume downloaded!"),
   });
+
   /* --------------------------- Fetch Profile --------------------------- */
   useEffect(() => {
     const fetchProfile = async () => {
@@ -109,6 +107,7 @@ const CreateResume = () => {
 
     fetchProfile();
   }, []);
+
   /* --------------------------- Fetch Profile & Resume --------------------------- */
   useEffect(() => {
     const fetchData = async () => {
@@ -123,14 +122,11 @@ const CreateResume = () => {
         const token = currentUser.token;
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
-        // 1. Call the GET Resume Endpoint (which returns { profile, resume })
-        // Make sure your backend route is correct (e.g., /resume or /resume/get)
         const res = await axios.get("http://localhost:5000/resume/get", config);
 
         if (res.data.success) {
           const { profile, resume } = res.data.data;
 
-          // Helper to parse dates from DB string to Date Object
           const parseDate = (dateStr) => (dateStr ? new Date(dateStr) : null);
 
           setFormData((prev) => ({
@@ -255,92 +251,6 @@ const CreateResume = () => {
   };
 
   /* -------------------------------------------------------------------------- */
-  /*                     PDF DOWNLOAD FUNCTION (NEW)                           */
-  /* -------------------------------------------------------------------------- */
-
-  const downloadPDF = async () => {
-    const element = document.getElementById("resume-preview");
-
-    if (!element) {
-      toast.error("Preview is not loaded!");
-      return;
-    }
-
-    try {
-      await handleSaveResume();
-      toast.loading("Generating PDF...");
-
-      // 1. Get Explicit Dimensions (Fixes "Empty Image" bug)
-      const w = element.scrollWidth;
-      const h = element.scrollHeight;
-
-      // 2. Wait for any final renders
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      const dataUrl = await toPng(element, {
-        quality: 0.95,
-        backgroundColor: "#ffffff",
-        // 👇 Force the image to match the element's real size
-        width: w,
-        height: h,
-
-        // 👇 Strip shadows/margins during capture to prevent glitches
-        style: {
-          margin: "0",
-          boxShadow: "none",
-          transform: "none",
-        },
-
-        // 👇 Keep your existing filter (It works!)
-        filter: (node) => {
-          if (node.tagName === "LINK" && node.rel === "stylesheet") {
-            if (
-              node.href.includes("googleapis") ||
-              node.href.includes("Material+Icons")
-            ) {
-              return false;
-            }
-          }
-          return true;
-        },
-      });
-
-      if (!dataUrl || dataUrl.length < 100) {
-        throw new Error("Generated image was empty. Check console.");
-      }
-
-      // 3. Generate PDF
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      // Calculate height maintaining aspect ratio
-      const imgHeight = (h * pdfWidth) / w;
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(dataUrl, "PNG", 0, position, pdfWidth, imgHeight);
-      heightLeft -= pdfHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(dataUrl, "PNG", 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
-      }
-
-      pdf.save("Resume.pdf");
-      toast.dismiss();
-      toast.success("📄 PDF Downloaded!");
-    } catch (err) {
-      console.error("PDF Error:", err);
-      toast.dismiss();
-      toast.error("Download failed.");
-    }
-  };
-
-  /* -------------------------------------------------------------------------- */
   /*                                Preview                                     */
   /* -------------------------------------------------------------------------- */
 
@@ -393,22 +303,26 @@ const CreateResume = () => {
     return (
       <div
         id="resume-preview"
-        className="bg-white p-10 rounded-xl shadow-xl w-full md:w-[21cm] min-h-[29.7cm] mx-auto"
+        className="bg-white p-6 md:p-10 rounded-xl shadow-xl w-full md:w-[21cm] min-h-[29.7cm] mx-auto text-sm md:text-base"
       >
-        <h1 className="text-4xl font-bold text-center text-gray-900">
+        <h1 className="text-2xl md:text-4xl font-bold text-center text-gray-900">
           {fullName || "YOUR NAME"}
         </h1>
 
-        <p className="text-center text-gray-700 mt-2 flex flex-wrap justify-center items-center gap-6">
-          <span className="flex items-center gap-1">
-            <FaEnvelope className="text-gray-600 text-sm" />
-            {formData.email}
-          </span>
+        <p className="text-center text-gray-700 mt-3 flex flex-wrap justify-center items-center gap-4 md:gap-6 text-xs md:text-sm">
+          {formData.email && (
+            <span className="flex items-center gap-1">
+              <FaEnvelope className="text-gray-600 text-xs" />
+              {formData.email}
+            </span>
+          )}
 
-          <span className="flex items-center gap-1">
-            <FaPhoneAlt className="text-gray-600 text-sm" />
-            {formData.contact}
-          </span>
+          {formData.contact && (
+            <span className="flex items-center gap-1">
+              <FaPhoneAlt className="text-gray-600 text-xs" />
+              {formData.contact}
+            </span>
+          )}
 
           {formData.linkedinLink && (
             <a
@@ -417,7 +331,7 @@ const CreateResume = () => {
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-black hover:underline"
             >
-              <FaLinkedin className="text-black text-sm" />
+              <FaLinkedin className="text-black text-xs" />
               LinkedIn
             </a>
           )}
@@ -429,12 +343,13 @@ const CreateResume = () => {
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-gray-900 hover:underline"
             >
-              <FaGithub className="text-gray-900 text-sm" />
+              <FaGithub className="text-gray-900 text-xs" />
               GitHub
             </a>
           )}
         </p>
 
+        {/* Education */}
         <Section title="Education" />
         <p className="font-semibold text-gray-900">
           {formData.collegeName || "College Name"}{" "}
@@ -445,6 +360,7 @@ const CreateResume = () => {
           {formData.cgpa ? ` · CGPA: ${formData.cgpa}` : ""}
         </p>
 
+        {/* Skills */}
         {hasSkills && (
           <>
             <Section title="Key Skills" />
@@ -456,12 +372,13 @@ const CreateResume = () => {
           </>
         )}
 
+        {/* Experience */}
         {hasExperience && (
           <>
             <Section title="Experience" />
             {formData.experience.map((e, i) =>
               e.companyName || e.role || e.description ? (
-                <div key={i} className="mb-4">
+                <div key={i} className="mb-3">
                   <p className="font-semibold text-gray-900">
                     {e.companyName} — {e.role}{" "}
                     <span className="text-gray-600">
@@ -482,61 +399,53 @@ const CreateResume = () => {
           </>
         )}
 
-{hasProjects && (
-  <>
-    <Section title="Projects" />
+        {/* Projects */}
+        {hasProjects && (
+          <>
+            <Section title="Projects" />
+            {formData.projects.map((p, i) =>
+              p.title || p.description ? (
+                <div key={i} className="mb-3">
+                  <div className="flex items-center flex-wrap gap-2 text-gray-900">
+                    <span className="font-semibold">{p.title}</span>
 
-    {formData.projects.map((p, i) =>
-      p.title || p.description ? (
-        <div key={i} className="mb-4">
+                    {p.link && <span>|</span>}
 
-          {/* One line row */}
-          <div className="flex items-center flex-wrap gap-2 text-gray-900">
-            {/* Project Title */}
-            <span className="font-semibold">{p.title}</span>
+                    {p.link && (
+                      <a
+                        href={p.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Link
+                      </a>
+                    )}
 
-            {/* Separator */}
-            {p.link && <span>|</span>}
+                    {p.techStack && <span>|</span>}
 
-            {/* Link */}
-            {p.link && (
-              <a
-                href={p.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-black underline"
-              >
-                Link
-              </a>
+                    {p.techStack && <span>{p.techStack}</span>}
+                  </div>
+
+                  {p.description &&
+                    p.description.split("\n").map((line, idx) => (
+                      <ul key={idx} className="ml-6 list-disc text-gray-700">
+                        <li>{line}</li>
+                      </ul>
+                    ))}
+                </div>
+              ) : null
             )}
+          </>
+        )}
 
-            {/* Separator */}
-            {p.techStack && <span>|</span>}
-
-            {/* Tech Stack */}
-            {p.techStack && <span>{p.techStack}</span>}
-          </div>
-
-          {/* Description */}
-          {p.description &&
-            p.description.split("\n").map((line, idx) => (
-              <ul key={idx} className="ml-6 list-disc text-gray-700">
-                <li>{line}</li>
-              </ul>
-            ))}
-        </div>
-      ) : null
-    )}
-  </>
-)}
-
-
+        {/* Achievements */}
         {hasAchievements && (
           <>
             <Section title="Achievements" />
             {formData.achievements.map((a, i) =>
               a.title || a.institution || a.description ? (
-                <ul key={i} className="ml-6 list-disc text-gray-700">
+                <ul key={i} className="ml-6 list-disc text-gray-700 mb-1">
                   <li>
                     <span className="font-semibold">{a.title}</span>
                     {a.institution ? ` — ${a.institution}` : ""}{" "}
@@ -548,14 +457,16 @@ const CreateResume = () => {
           </>
         )}
 
+        {/* POR */}
         {hasPOR && (
           <>
             <Section title="Positions of Responsibility" />
             {formData.positionOfResponsibility.map((p, i) =>
               p.title || p.organization ? (
-                <div key={i}>
+                <div key={i} className="mb-2">
                   <p className="font-semibold">
-                    {p.title} — {p.organization} ({p.duration})
+                    {p.title} — {p.organization}{" "}
+                    {p.duration ? `(${p.duration})` : ""}
                   </p>
 
                   {p.description &&
@@ -580,7 +491,13 @@ const CreateResume = () => {
     });
 
   if (loading)
-    return <p className="text-center p-10 text-gray-500">Loading profile...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-center px-4 py-4 text-gray-500 bg-white rounded-lg shadow">
+          Loading profile...
+        </p>
+      </div>
+    );
 
   const handleTogglePreview = () => {
     convertKeySkillsForSave();
@@ -588,7 +505,7 @@ const CreateResume = () => {
   };
 
   const handleSaveResume = async (e) => {
-    if (e) e.preventDefault(); // Prevent form reload
+    if (e) e.preventDefault();
 
     try {
       const currentUser = JSON.parse(localStorage.getItem("currentUser"));
@@ -597,19 +514,15 @@ const CreateResume = () => {
         return;
       }
 
-      // Convert Skills text to array before sending
       const formattedSkills = convertKeySkillsForSave();
 
-      // Prepare Payload
       const payload = {
         ...formData,
-        keySkills: formattedSkills, // Ensure array format
+        keySkills: formattedSkills,
       };
 
       const token = currentUser.token;
 
-      // Call the UPDATE endpoint
-      // Assuming route is http://localhost:5000/resume/update
       const res = await axios.put(
         "http://localhost:5000/resume/update",
         payload,
@@ -626,47 +539,63 @@ const CreateResume = () => {
       toast.error(error.response?.data?.message || "Failed to save resume");
     }
   };
+
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex flex- items-start gap-2">
-          <FaMagic className="text-5xl text-emerald-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Resume Builder</h1>
-        </div>
+    <div className="min-h-screen bg-gray-50 px-4 py-6 md:px-8 md:py-10">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-8">
+          <div className="flex items-start gap-3">
+            <FaMagic className="text-4xl md:text-5xl text-emerald-600 flex-shrink-0" />
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Resume Builder
+              </h1>
+              <p className="text-gray-600 text-sm md:text-base">
+                Fill your details, preview, and download your resume as PDF.
+              </p>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-3">
-          {showPreview && (
+          <div className="flex flex-wrap items-center gap-3">
+            {showPreview && (
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="px-4 md:px-5 py-2 rounded-lg bg-green-600 text-white text-sm md:text-base"
+              >
+                Download PDF
+              </button>
+            )}
+
             <button
-              onClick={handlePrint}
-              className="px-5 py-2 rounded-lg bg-green-600 text-white"
+              type="button"
+              onClick={handleTogglePreview}
+              className="px-4 md:px-5 py-2 rounded-lg bg-blue-600 text-white text-sm md:text-base"
             >
-              Download PDF
+              {showPreview ? "Back to Form" : "Preview Resume"}
             </button>
-          )}
-
-          <button
-            onClick={handleTogglePreview}
-            className="px-5 py-2 rounded-lg bg-blue-600 text-white"
-          >
-            {showPreview ? "Back to Form" : "Preview Resume"}
-          </button>
+          </div>
         </div>
+
+        {/* Main Content */}
+        {!showPreview ? (
+          <ResumeForm
+            formData={formData}
+            setFormData={setFormData}
+            handleChange={handleChange}
+            addField={addField}
+            removeField={removeField}
+            handleSaveResume={handleSaveResume}
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <div ref={resumeRef} className="inline-block">
+              <Preview />
+            </div>
+          </div>
+        )}
       </div>
-
-      {!showPreview ? (
-        <ResumeForm
-          formData={formData}
-          setFormData={setFormData}
-          handleChange={handleChange}
-          addField={addField}
-          removeField={removeField}
-          handleSaveResume={handleSaveResume}
-        />
-      ) : (
-        <div ref={resumeRef} className="print-container">
-          <Preview />
-        </div>
-      )}
     </div>
   );
 };
@@ -685,12 +614,12 @@ const ResumeForm = ({
 }) => {
   return (
     <form
-      className="bg-white p-8 rounded-xl shadow-xl space-y-10"
+      className="bg-white p-6 md:p-8 rounded-xl shadow-xl space-y-10"
       onSubmit={(e) => e.preventDefault()}
     >
       <SectionHeader title="Basic Information" />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <Input
           label="First Name"
           name="firstName"
@@ -736,7 +665,7 @@ const ResumeForm = ({
       </div>
 
       <SectionHeader title="Important Links" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <Input
           label="GitHub Link"
           name="githubLink"
@@ -826,8 +755,9 @@ const ResumeForm = ({
       />
 
       <button
+        type="button"
         onClick={handleSaveResume}
-        className="w-full py-3 bg-green-600 text-white text-lg rounded-md"
+        className="w-full py-3 bg-green-600 hover:bg-green-700 transition text-white text-base md:text-lg rounded-md mt-4"
       >
         Save Resume
       </button>
@@ -870,7 +800,7 @@ const Repeater = ({
     <button
       type="button"
       onClick={() => addField(type, template)}
-      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md"
+      className="mt-2 flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm md:text-base"
     >
       <FaPlus /> Add More
     </button>
@@ -942,7 +872,7 @@ const AITextarea = ({ value, onChange, meta, type }) => {
         rows={4}
       />
 
-      <div className="flex items-center gap-3 mt-2">
+      <div className="flex flex-wrap items-center gap-3 mt-2">
         <button
           type="button"
           onClick={improveWithAI}
@@ -987,10 +917,15 @@ const DynamicCard = ({
   };
 
   return (
-    <div className="bg-gray-50 p-5 rounded-lg border shadow-sm mb-4">
+    <div className="bg-gray-50 p-4 md:p-5 rounded-lg border shadow-sm mb-4">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <button onClick={onRemove} className="text-red-600">
+        <h3 className="text-base md:text-lg font-semibold">{title}</h3>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-red-600 hover:text-red-700 disabled:opacity-40"
+          disabled={!onRemove}
+        >
           <FaTrash />
         </button>
       </div>
@@ -1012,7 +947,7 @@ const DynamicCard = ({
             onChange={(e) => handleChange(e, index, type)}
           />
 
-          <div className="grid grid-cols-2 gap-4 mt-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
             <div>
               <label className="text-sm text-gray-700 block mb-1">
                 Start Date
@@ -1090,19 +1025,24 @@ const DynamicCard = ({
 /* -------------------------------------------------------------------------- */
 
 const SectionHeader = ({ title }) => (
-  <h2 className="text-xl font-semibold text-gray-900 border-l-4 border-blue-600 pl-4 mb-4">
+  <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-l-4 border-blue-600 pl-3 md:pl-4 mb-4">
     {title}
   </h2>
 );
 
 const Section = ({ title }) => (
-  <h2 className="text-xl font-semibold text-black mt-6 mb-2">{title}</h2>
+  <h2 className="text-lg md:text-xl font-semibold text-black mt-6 mb-2">
+    {title}
+  </h2>
 );
 
 const Input = ({ label, ...props }) => (
-  <div className="w-full mt-3">
+  <div className="w-full mt-2">
     <label className="text-sm text-gray-700 block mb-1">{label}</label>
-    <input {...props} className="w-full px-3 py-2 border rounded bg-gray-50" />
+    <input
+      {...props}
+      className="w-full px-3 py-2 border rounded bg-gray-50 text-sm md:text-base"
+    />
   </div>
 );
 

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FaBuilding } from "react-icons/fa";
 import axios from "axios";
 
-// Chart.js
 import { Pie, Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -40,8 +39,9 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch job preference stats (Tech / Non-Tech)
-        const res = await axios.get("http://localhost:5000/profile/jobpreferencestats");
+        const res = await axios.get(
+          "http://localhost:5000/profile/jobpreferencestats"
+        );
 
         if (res.data.success) {
           setJobStats({
@@ -50,7 +50,6 @@ const AdminDashboard = () => {
           });
         }
 
-        // Fetch earliest company visit
         const companyRes = await axios.get(
           "http://localhost:5000/company/earliest-admin",
           {
@@ -67,7 +66,7 @@ const AdminDashboard = () => {
             name: companyRes.data.data.companyName,
             date: companyRes.data.data.visitDate,
             totalApplied: companyRes.data.data.totalStudentsApplied,
-            jobType: companyRes.data.data.jobType
+            jobType: companyRes.data.data.jobType,
           });
         }
       } catch (err) {
@@ -78,7 +77,7 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-  // ---------- PIE CHART ----------
+  // PIE CHART
   const pieData = {
     labels: ["Tech", "Non-Tech"],
     datasets: [
@@ -91,7 +90,7 @@ const AdminDashboard = () => {
 
   const pieOptions = { plugins: { legend: { display: false } } };
 
-  // ---------- LINE CHART ----------
+  // LINE CHART
   const lineData = {
     labels: ["2021", "2022", "2023", "2024", "2025"],
     datasets: [
@@ -108,7 +107,7 @@ const AdminDashboard = () => {
 
   const lineOptions = { plugins: { legend: { display: false } } };
 
-  // ---------- BAR CHART ----------
+  // BAR CHART
   const barData = {
     labels: ["2020", "2021", "2022", "2023", "2024"],
     datasets: [
@@ -123,24 +122,21 @@ const AdminDashboard = () => {
 
   const barOptions = { plugins: { legend: { display: false } } };
 
-  // ---------- STAT CARD ----------
+  // STAT CARD
   const StatCard = ({ icon: Icon, title, value }) => (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <div className="flex items-center gap-4">
+    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
         
-        {/* Icon Circle */}
-        <div className="p-3 rounded-full bg-gradient-to-r from-green-500 to-green-600 shadow-md">
+        <div className="p-3 rounded-full bg-gradient-to-r from-green-500 to-green-600 shadow-md self-start sm:self-auto">
           <Icon className="w-6 h-6 text-white" />
         </div>
 
-        {/* Text Section */}
-        <div className="flex flex-col">
+        <div className="flex-1">
           <p className="text-gray-500 text-sm">{title}</p>
-
-          <p className="text-gray-800 text-base whitespace-pre-line mt-1 leading-relaxed">
-            {value}
-          </p>
+          <div className="mt-1 text-gray-800 text-sm sm:text-base">{value}</div>
         </div>
+
       </div>
     </div>
   );
@@ -148,52 +144,53 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6">
 
-      {/* ---------- ROW 1: 3 CHARTS ---------- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+      {/* CHARTS SECTION */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
         {/* PIE */}
-        <div className="w-full h-56 bg-white rounded-lg shadow flex flex-col items-center justify-center p-2">
-          <div className="w-40 h-40">
+        <div className="w-full bg-white rounded-lg shadow p-3 flex flex-col items-center">
+          <div className="w-32 h-32 sm:w-40 sm:h-40">
             <Pie data={pieData} options={pieOptions} />
           </div>
-          <p className="mt-2 text-xs text-gray-600">
+          <p className="mt-3 text-xs sm:text-sm text-gray-600">
             Tech: {jobStats.tech} | Non-Tech: {jobStats.nonTech}
           </p>
         </div>
 
         {/* BAR */}
-        <div className="w-full h-56 bg-white rounded-lg shadow flex flex-col items-center justify-center p-2">
-          <div className="w-80 h-80">
+        <div className="w-full bg-white rounded-lg shadow p-3 flex flex-col items-center">
+          <div className="w-full max-w-xs sm:max-w-sm h-40 sm:h-48">
             <Bar data={barData} options={barOptions} />
           </div>
-          <p className="mt-2 text-xs text-gray-600">Average Package Trend</p>
+          <p className="mt-3 text-xs sm:text-sm text-gray-600">
+            Average Package Trend
+          </p>
         </div>
 
         {/* LINE */}
-        <div className="w-full h-56 bg-white rounded-lg shadow flex flex-col items-center justify-center p-2">
-          <div className="w-80 h-80">
+        <div className="w-full bg-white rounded-lg shadow p-3 flex flex-col items-center">
+          <div className="w-full max-w-xs sm:max-w-sm h-40 sm:h-48">
             <Line data={lineData} options={lineOptions} />
           </div>
-          <p className="mt-2 text-xs text-gray-600">Placement Trend</p>
+          <p className="mt-3 text-xs sm:text-sm text-gray-600">
+            Placement Trend
+          </p>
         </div>
 
       </div>
 
-      {/* ---------- ROW 2: COMPANY DETAILS ---------- */}
-   <StatCard
-  icon={FaBuilding}
-  title={`Earliest Company: ${earliestCompany.name}`}
-  value={
-    <div className="flex items-center justify-between w-full text-gray-800 gap-10">
-      <span>Visiting On: {earliestCompany.date}</span>
-      <span>Students Applied: {earliestCompany.totalApplied}</span>
-      <span>Job Type: {earliestCompany.jobType}</span>
-    </div>
-  }
-/>
-
-
-
+      {/* COMPANY DETAILS CARD */}
+      <StatCard
+        icon={FaBuilding}
+        title={`Earliest Company: ${earliestCompany.name}`}
+        value={
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 gap-2">
+            <span>Visiting On: {earliestCompany.date}</span>
+            <span>Students Applied: {earliestCompany.totalApplied}</span>
+            <span>Job Type: {earliestCompany.jobType}</span>
+          </div>
+        }
+      />
 
     </div>
   );

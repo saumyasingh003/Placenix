@@ -1,47 +1,48 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { 
-  FaHome, 
-  FaBuilding, 
-  FaHistory, 
-  FaUsers, 
-  FaInfoCircle, 
-  FaBars, 
-  FaTimes 
+import {
+  FaHome,
+  FaBuilding,
+  FaHistory,
+  FaUsers,
+  FaInfoCircle,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 import { cn } from "../../utils";
 
-
 const AdminSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = [
     { icon: FaHome, label: "Dashboard", path: "/admin" },
     { icon: FaBuilding, label: "Register Company", path: "/admin/register-company" },
     { icon: FaHistory, label: "Company Details", path: "/admin/history" },
-    { icon: FaUsers, label: "Registered Students", path: "/admin/students" }
+    { icon: FaUsers, label: "Registered Students", path: "/admin/students" },
   ];
 
-  const bottomNavItems = [
-    { icon: FaInfoCircle, label: "About", path: "/admin/about" }
-  ];
+  const bottomNavItems = [{ icon: FaInfoCircle, label: "About", path: "/admin/about" }];
 
   return (
     <>
       {/* MOBILE TOGGLE BUTTON */}
       <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="fixed top-20 left-4 z-40 md:hidden h-10 w-10 flex items-center justify-center 
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="fixed top-20 left-4 z-50 md:hidden h-10 w-10 flex items-center justify-center 
                    rounded-lg bg-white shadow border"
       >
-        {isCollapsed ? <FaBars /> : <FaTimes />}
+        {mobileOpen ? <FaTimes /> : <FaBars />}
       </button>
 
       {/* SIDEBAR */}
       <aside
         className={cn(
-          "fixed md:sticky top-16 left-0 h-[calc(100vh-4rem)] bg-white border-r shadow-sm transition-all duration-300",
-          isCollapsed ? "w-0 md:w-16" : "w-64"
+          "fixed md:sticky top-16 left-0 h-[calc(100vh-4rem)] bg-white border-r shadow-sm transition-all duration-300 z-40",
+          // Desktop collapse
+          isCollapsed ? "md:w-16" : "md:w-64",
+          // Mobile drawer
+          mobileOpen ? "w-64 left-0" : "w-64 -left-64 md:left-0"
         )}
       >
         <div className="flex flex-col h-full p-3">
@@ -63,14 +64,17 @@ const AdminSidebar = () => {
                 key={item.path}
                 to={item.path}
                 end={item.path === "/admin"}
+                onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-3 px-3 py-2 rounded-lg transition",
+                    isActive ? "bg-[#00916E] text-white font-semibold" : "hover:bg-gray-100",
 
-                    !isActive && "hover:bg-gray-100 hover:text-black",
-                    isActive && "bg-[#00916E] text-white font-semibold",
+                    // Center icons in collapsed mode
+                    isCollapsed && "justify-center",
 
-                    isCollapsed && "justify-center"
+                    // Center items in mobile drawer if collapsed
+                    mobileOpen && isCollapsed && "justify-start"
                   )
                 }
               >
@@ -85,12 +89,11 @@ const AdminSidebar = () => {
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     cn(
                       "flex items-center gap-3 px-3 py-2 rounded-lg transition",
-
-                      !isActive && "hover:bg-gray-100 hover:text-black",
-                      isActive && "bg-[#00916E] text-white font-semibold",
+                      isActive ? "bg-[#00916E] text-white font-semibold" : "hover:bg-gray-100",
 
                       isCollapsed && "justify-center"
                     )
@@ -105,6 +108,14 @@ const AdminSidebar = () => {
           </nav>
         </div>
       </aside>
+
+      {/* MOBILE OVERLAY */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-20 z-30 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        ></div>
+      )}
     </>
   );
 };

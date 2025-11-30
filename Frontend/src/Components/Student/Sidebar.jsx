@@ -16,8 +16,10 @@ import {
 import { cn } from "../../utils";
 
 const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);     // Desktop collapse
+  const [isMobileOpen, setIsMobileOpen] = useState(false);   // Mobile open/close
   const [isPortfolioOpen, setIsPortfolioOpen] = useState(true);
+
   const location = useLocation();
 
   const navItems = [
@@ -39,19 +41,40 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* MOBILE TOGGLE BUTTON */}
+      {/* ----------------------------------------------------------- */}
+      {/* MOBILE FLOATING TOGGLE BUTTON */}
+      {/* ----------------------------------------------------------- */}
       <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="fixed top-20 left-4 z-40 md:hidden h-10 w-10 flex items-center justify-center rounded-lg bg-white text-black shadow"
+        onClick={() => setIsMobileOpen(true)}
+        className="md:hidden fixed top-20 left-4 z-50 h-10 w-10 flex items-center justify-center rounded-lg bg-white text-black shadow"
       >
-        {isCollapsed ? <FaBars /> : <FaTimes />}
+        <FaBars className="w-5 h-5" />
       </button>
 
+      {/* ----------------------------------------------------------- */}
+      {/* MOBILE OVERLAY */}
+      {/* ----------------------------------------------------------- */}
+      {isMobileOpen && (
+        <div
+          onClick={() => setIsMobileOpen(false)}
+          className="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden"
+        />
+      )}
+
+      {/* ----------------------------------------------------------- */}
       {/* SIDEBAR */}
+      {/* ----------------------------------------------------------- */}
       <aside
         className={cn(
-          "fixed md:sticky top-16 left-0 h-[calc(100vh-4rem)] text-white border-r transition-all duration-300 ease-in-out z-30",
-          isCollapsed ? "w-0 md:w-16" : "w-64"
+          "fixed md:sticky top-16 left-0 h-[calc(100vh-4rem)] text-white border-r transition-all duration-300 ease-in-out z-50 md:z-30",
+
+          // Desktop collapse
+          isCollapsed ? "md:w-16" : "md:w-64",
+
+          // Mobile slide-in / slide-out
+          isMobileOpen
+            ? "w-64 translate-x-0"
+            : "w-64 -translate-x-full md:translate-x-0"
         )}
         style={{ backgroundColor: "#00916E" }}
       >
@@ -65,6 +88,14 @@ const Sidebar = () => {
             {isCollapsed ? <FaBars /> : <FaTimes />}
           </button>
 
+          {/* MOBILE CLOSE BUTTON */}
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="md:hidden ml-auto mb-4 h-10 w-10 flex items-center justify-center rounded-lg hover:bg-[#FEEFE5] hover:text-black"
+          >
+            <FaTimes className="w-5 h-5" />
+          </button>
+
           <nav className="flex-1 flex flex-col space-y-1">
 
             {/* TOP NAV ITEMS */}
@@ -73,26 +104,26 @@ const Sidebar = () => {
                 key={item.path}
                 to={item.path}
                 end={item.path === "/home"}
+                onClick={() => setIsMobileOpen(false)}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-3 px-3 py-2 rounded-lg transition",
 
-                    // ⭐ apply hover ONLY when not active
                     !isActive && "hover:bg-[#FEEFE5] hover:text-black",
-
-                    // ⭐ active tab stays yellow even on hover
                     isActive && "bg-[#FFCF00] text-black font-semibold",
 
                     isCollapsed && "justify-center"
                   )
                 }
               >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
+                <item.icon className="w-5 h-5" />
                 {!isCollapsed && <span>{item.label}</span>}
               </NavLink>
             ))}
 
-            {/* PORTFOLIO SECTION */}
+            {/* ------------------------------------------------------ */}
+            {/* PORTFOLIO MENU */}
+            {/* ------------------------------------------------------ */}
             <div>
               <button
                 onClick={() => setIsPortfolioOpen(!isPortfolioOpen)}
@@ -123,10 +154,10 @@ const Sidebar = () => {
                     <NavLink
                       key={item.path}
                       to={item.path}
+                      onClick={() => setIsMobileOpen(false)}
                       className={({ isActive }) =>
                         cn(
                           "block px-3 py-1.5 rounded-lg text-sm transition",
-
                           !isActive && "hover:bg-[#FEEFE5] hover:text-black",
                           isActive && "bg-[#FFCF00] text-black font-semibold"
                         )
@@ -139,12 +170,15 @@ const Sidebar = () => {
               )}
             </div>
 
+            {/* ------------------------------------------------------ */}
             {/* BOTTOM NAV ITEMS */}
+            {/* ------------------------------------------------------ */}
             <div className="mt-auto">
               {bottomNavItems.map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  onClick={() => setIsMobileOpen(false)}
                   className={({ isActive }) =>
                     cn(
                       "flex items-center gap-3 px-3 py-2 rounded-lg transition",

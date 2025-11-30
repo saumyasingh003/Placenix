@@ -18,16 +18,16 @@ const RegisterCompany = () => {
       apptitude: false,
       coding: false,
       personalInterview: false,
-      groupDiscussion: false
-    }
+      groupDiscussion: false,
+    },
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // If user changes type, clear related fields
+    // Clear Opposing Fields Depending On Type
     if (name === "type") {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         type: value,
         packageOffered: value === "internship" ? "" : prev.packageOffered,
@@ -36,22 +36,19 @@ const RegisterCompany = () => {
       return;
     }
 
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSkillsChange = (e) => {
-    const skills = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
-    setFormData(prev => ({ ...prev, skillsRequired: skills }));
+    const skills = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+    setFormData((prev) => ({ ...prev, skillsRequired: skills }));
   };
 
   const handleHiringProcessChange = (e) => {
     const { name, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      hiringProcess: { ...prev.hiringProcess, [name]: checked }
+      hiringProcess: { ...prev.hiringProcess, [name]: checked },
     }));
   };
 
@@ -60,17 +57,14 @@ const RegisterCompany = () => {
 
     try {
       const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
       if (!currentUser) return toast.error("You must be logged in as Admin");
       if (currentUser.role.toLowerCase() !== "admin")
         return toast.error("Only admin can register a company");
 
-      const res = await axios.post(
-        "http://localhost:5000/company/add",
-        formData,
-        {
-          headers: { Authorization: `Bearer ${currentUser.token}` },
-        }
-      );
+      const res = await axios.post("http://localhost:5000/company/add", formData, {
+        headers: { Authorization: `Bearer ${currentUser.token}` },
+      });
 
       toast.success(res.data.message || "Company registered!");
 
@@ -90,8 +84,8 @@ const RegisterCompany = () => {
           apptitude: false,
           coding: false,
           personalInterview: false,
-          groupDiscussion: false
-        }
+          groupDiscussion: false,
+        },
       });
 
     } catch (error) {
@@ -101,41 +95,50 @@ const RegisterCompany = () => {
 
   return (
     <div className="w-full">
+
       {/* HEADER */}
-      <div className="w-full p-6 bg-white border-b border-gray-300 rounded-xl shadow-sm">
-        <h1 className="text-3xl font-semibold text-gray-900">Register Company</h1>
-        <p className="text-gray-600 text-sm mt-1">Add details for the placement drive</p>
+      <div className="w-full p-4 sm:p-6 bg-white border-b border-gray-300 rounded-xl shadow-sm">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
+          Register Company
+        </h1>
+        <p className="text-gray-600 text-xs sm:text-sm mt-1">
+          Add details for the placement drive
+        </p>
       </div>
 
       {/* FORM */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-md border border-gray-200 rounded-xl p-8 mt-6"
+        className="bg-white shadow-md border border-gray-200 rounded-xl p-5 sm:p-8 mt-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           {/* COMPANY NAME */}
           <div className="space-y-1">
-            <label className="text-gray-700 font-medium">Company Name *</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Company Name *
+            </label>
             <input
               type="text"
               name="companyName"
               value={formData.companyName}
               onChange={handleChange}
               required
-              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300"
+              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 text-sm"
             />
           </div>
 
-          {/* TYPE FIELD UPDATED */}
+          {/* TYPE FIELD */}
           <div className="space-y-1">
-            <label className="text-gray-700 font-medium">Company Type *</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Company Type *
+            </label>
             <select
               name="type"
               value={formData.type}
               onChange={handleChange}
               required
-              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300"
+              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 text-sm"
             >
               <option value="">Select Type</option>
               <option value="job">Job</option>
@@ -146,57 +149,67 @@ const RegisterCompany = () => {
 
           {/* DESCRIPTION */}
           <div className="md:col-span-2 space-y-1">
-            <label className="text-gray-700 font-medium">Description *</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Description *
+            </label>
             <textarea
               name="description"
               rows={3}
               value={formData.description}
               onChange={handleChange}
               required
-              className="w-full rounded-lg border bg-gray-50 border-gray-300 px-3 py-2"
+              className="w-full rounded-lg border bg-gray-50 border-gray-300 px-3 py-2 text-sm"
             />
           </div>
 
           {/* DATES */}
           <div className="space-y-1">
-            <label className="text-gray-700 font-medium">Registration Starts *</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Registration Starts *
+            </label>
             <input
               type="date"
               name="startRegistrationDate"
               value={formData.startRegistrationDate}
               onChange={handleChange}
               required
-              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300"
+              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 text-sm"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-gray-700 font-medium">Registration Ends *</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Registration Ends *
+            </label>
             <input
               type="date"
               name="endRegistrationDate"
               value={formData.endRegistrationDate}
               onChange={handleChange}
               required
-              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300"
+              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 text-sm"
             />
           </div>
 
           {/* VISIT DATE */}
           <div className="space-y-1">
-            <label className="text-gray-700 font-medium">Visit Date</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Visit Date
+            </label>
             <input
               type="date"
               name="visitDate"
               value={formData.visitDate}
               onChange={handleChange}
-              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300"
+              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 text-sm"
             />
           </div>
 
           {/* JOB CATEGORY */}
           <div className="space-y-1">
-            <label className="text-gray-700 font-medium">Job Category *</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Job Category *
+            </label>
             <input
               type="text"
               name="jobCategory"
@@ -204,13 +217,15 @@ const RegisterCompany = () => {
               onChange={handleChange}
               required
               placeholder="e.g., non-tech"
-              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300"
+              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 text-sm"
             />
           </div>
 
-          {/* PACKAGE (Enable/Disable Based on Type) */}
+          {/* PACKAGE */}
           <div className="space-y-1">
-            <label className="text-gray-700 font-medium">Package Offered</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Package Offered
+            </label>
             <input
               type="text"
               name="packageOffered"
@@ -218,15 +233,17 @@ const RegisterCompany = () => {
               onChange={handleChange}
               disabled={formData.type === "internship"}
               placeholder="e.g., 6 LPA"
-              className={`w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 ${
+              className={`w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 text-sm ${
                 formData.type === "internship" ? "opacity-40 cursor-not-allowed" : ""
               }`}
             />
           </div>
 
-          {/* STIPEND (Enable/Disable Based on Type) */}
+          {/* STIPEND */}
           <div className="space-y-1">
-            <label className="text-gray-700 font-medium">Internship Stipend</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Internship Stipend
+            </label>
             <input
               type="text"
               name="internshipStipend"
@@ -234,7 +251,7 @@ const RegisterCompany = () => {
               onChange={handleChange}
               disabled={formData.type === "job"}
               placeholder="e.g., 15000/month"
-              className={`w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 ${
+              className={`w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 text-sm ${
                 formData.type === "job" ? "opacity-40 cursor-not-allowed" : ""
               }`}
             />
@@ -242,14 +259,16 @@ const RegisterCompany = () => {
 
           {/* HIRING PROCESS CHECKBOXES */}
           <div className="md:col-span-2 space-y-2">
-            <label className="text-gray-700 font-medium">Hiring Process *</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Hiring Process *
+            </label>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-xs sm:text-sm">
               {[
                 ["apptitude", "Aptitude"],
                 ["coding", "Coding Round"],
                 ["personalInterview", "Personal Interview"],
-                ["groupDiscussion", "Group Discussion"]
+                ["groupDiscussion", "Group Discussion"],
               ].map(([key, label]) => (
                 <label key={key} className="flex items-center gap-2 text-gray-700">
                   <input
@@ -266,18 +285,20 @@ const RegisterCompany = () => {
 
           {/* SKILLS */}
           <div className="md:col-span-2 space-y-1">
-            <label className="text-gray-700 font-medium">Skills Required *</label>
+            <label className="text-gray-700 font-medium text-sm sm:text-base">
+              Skills Required *
+            </label>
             <input
               type="text"
               placeholder="Communication, Business Knowledge, etc."
               onChange={handleSkillsChange}
-              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300"
+              className="w-full h-11 px-3 rounded-lg border bg-gray-50 border-gray-300 text-sm"
             />
           </div>
         </div>
 
         {/* BUTTONS */}
-        <div className="flex justify-end gap-4 pt-6">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6">
           <button
             type="button"
             onClick={() =>
@@ -296,18 +317,18 @@ const RegisterCompany = () => {
                   apptitude: false,
                   coding: false,
                   personalInterview: false,
-                  groupDiscussion: false
-                }
+                  groupDiscussion: false,
+                },
               })
             }
-            className="px-5 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-lg"
+            className="px-5 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm"
           >
             Reset
           </button>
 
           <button
             type="submit"
-            className="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-lg"
+            className="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-lg text-sm"
           >
             Register Company
           </button>
